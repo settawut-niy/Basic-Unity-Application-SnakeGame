@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class Snake : MonoBehaviour
 {
@@ -16,10 +15,14 @@ public class Snake : MonoBehaviour
     // Eat behavior
     bool ate = false;
 
+    // Movement
+    [Tooltip("Least is very fast")]
+    [SerializeField] [Range(0, 1)] float speed = 0.3f;
+
 
     void Start()
     {
-        InvokeRepeating("Move", 0.3f, 0.3f);
+        InvokeRepeating("Move", speed, speed);
     }
 
     void Update()
@@ -57,6 +60,14 @@ public class Snake : MonoBehaviour
                 currentDir = Vector2.left;
             }
         }
+
+        if(GameManager.instance.currentGameState == GameState.Stop)
+        {
+            if (Input.anyKeyDown)
+            {
+                GameManager.instance.StartPlay();
+            }
+        }
     }
 
     void OnTriggerEnter2D(Collider2D collision)
@@ -69,7 +80,7 @@ public class Snake : MonoBehaviour
         }
         else
         {
-            SceneManager.LoadScene("Snake Scene");
+            GameManager.instance.GameOver();
         }
 
     }
@@ -82,6 +93,8 @@ public class Snake : MonoBehaviour
 
         if (ate)
         {
+            ScoreBoard.instance.AddScore(1);
+
             GameObject body = (GameObject)Instantiate(tailPrefab, currentPosition, Quaternion.identity);
 
             tail.Insert(0,body.transform);
