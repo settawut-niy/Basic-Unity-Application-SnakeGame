@@ -20,8 +20,18 @@ public class SpawnFood : MonoBehaviour
 
     void Spawn()
     {
-        int x = (int)Random.Range(borderLeft.position.x+1, borderRight.position.x-1);
-        int y = (int)Random.Range(borderTop.position.y-1, borderBottom.position.y+1);
+        int x = (int)Random.Range(borderLeft.position.x + 2f, borderRight.position.x - 2f);
+        int y = (int)Random.Range(borderTop.position.y - 2f, borderBottom.position.y + 2f);
+
+        if (x % 2 == 0)
+        {
+            x++;
+        }
+
+        if (y % 2 == 0)
+        {
+            y++;
+        }
 
         Instantiate(foodPrefab, new Vector2(x, y), Quaternion.identity);
     }

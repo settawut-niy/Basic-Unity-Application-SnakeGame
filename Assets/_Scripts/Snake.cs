@@ -8,9 +8,12 @@ public class Snake : MonoBehaviour
     // Current snake direction
     Vector2 currentDir = Vector2.right;
 
-    // About tail
-    List<Transform> tail = new List<Transform>();
-    [SerializeField] GameObject tailPrefab;
+
+    // Snake parts
+    [SerializeField] Transform headTranform;
+    [SerializeField] Transform tailTranform;
+    [SerializeField] GameObject bodyPrefab;
+    List<Transform> body = new List<Transform>();
 
     // Eat behavior
     bool ate = false;
@@ -23,6 +26,9 @@ public class Snake : MonoBehaviour
     void Start()
     {
         InvokeRepeating("Move", speed, speed);
+
+        headTranform.eulerAngles = new Vector3(0,0,-90);
+        tailTranform.eulerAngles = new Vector3(0, 0, -90);
     }
 
     void Update()
@@ -32,38 +38,63 @@ public class Snake : MonoBehaviour
 
     void InputManager()
     {
-        if (Input.GetKey(KeyCode.UpArrow))
+        if (GameManager.instance.currentGameState != GameState.GameOver)
         {
-            if (currentDir != Vector2.down)
+            if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W))
             {
-                currentDir = Vector2.up;
+                if (currentDir != Vector2.down)
+                {
+                    currentDir = Vector2.up;
+                    headTranform.eulerAngles = new Vector3(0, 0, 0);
+
+                    AudioManager.instance.PlayInteractSound("pop");
+                }
             }
-        }
-        else if (Input.GetKey(KeyCode.DownArrow))
-        {
-            if (currentDir != Vector2.up)
+            else if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S))
             {
-                currentDir = Vector2.down;
+                if (currentDir != Vector2.up)
+                {
+                    currentDir = Vector2.down;
+                    headTranform.eulerAngles = new Vector3(0, 0, 180);
+
+                    AudioManager.instance.PlayInteractSound("pop");
+                }
             }
-        }
-        else if (Input.GetKey(KeyCode.RightArrow))
-        {
-            if (currentDir != Vector2.left)
+            else if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
             {
-                currentDir = Vector2.right;
+                if (currentDir != Vector2.left)
+                {
+                    currentDir = Vector2.right;
+                    headTranform.eulerAngles = new Vector3(0, 0, -90);
+
+                    AudioManager.instance.PlayInteractSound("beep");
+                }
             }
-        }
-        else if (Input.GetKey(KeyCode.LeftArrow))
-        {
-            if (currentDir != Vector2.right)
+            else if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
             {
-                currentDir = Vector2.left;
+                if (currentDir != Vector2.right)
+                {
+                    currentDir = Vector2.left;
+                    headTranform.eulerAngles = new Vector3(0, 0, 90);
+
+                    AudioManager.instance.PlayInteractSound("beep");
+                }
             }
         }
 
         if(GameManager.instance.currentGameState == GameState.Stop)
         {
-            if (Input.anyKeyDown)
+            if 
+                (
+                Input.GetKeyDown(KeyCode.UpArrow) || 
+                Input.GetKeyDown(KeyCode.DownArrow) ||
+                Input.GetKeyDown(KeyCode.LeftArrow) ||
+                Input.GetKeyDown(KeyCode.RightArrow) ||
+                Input.GetKeyDown(KeyCode.W) ||
+                Input.GetKeyDown(KeyCode.S) ||
+                Input.GetKeyDown(KeyCode.D) ||
+                Input.GetKeyDown(KeyCode.A)
+                )
             {
                 GameManager.instance.StartPlay();
             }
@@ -75,6 +106,8 @@ public class Snake : MonoBehaviour
         if (collision.name.StartsWith("Food"))
         {
             ate = true;
+
+            AudioManager.instance.PlayEatSound();
 
             Destroy(collision.gameObject);
         }
@@ -88,25 +121,58 @@ public class Snake : MonoBehaviour
     void Move()
     {
         Vector2 currentPosition = transform.position;
+        Vector3 currentRotation = headTranform.eulerAngles;
 
-        transform.Translate(currentDir);
+        transform.Translate(currentDir*2);
+
+        tailTranform.position = currentPosition;
+        tailTranform.eulerAngles = currentRotation;
 
         if (ate)
         {
             ScoreBoard.instance.AddScore(1);
 
-            GameObject body = (GameObject)Instantiate(tailPrefab, currentPosition, Quaternion.identity);
+            GameObject body = (GameObject)Instantiate(bodyPrefab, currentPosition, headTranform.rotation);
 
-            tail.Insert(0,body.transform);
+            this.body.Insert(0, body.transform);
 
             ate = false;
         }
-        else if (tail.Count > 0)
+        else if (body.Count > 0)
         {
-            tail.Last().position = currentPosition;
+            TailFollowing(body);
 
-            tail.Insert(0, tail.Last());
-            tail.RemoveAt(tail.Count-1);
+            body.Last().position = currentPosition;
+            body.Last().eulerAngles = currentRotation;
+
+            body.Insert(0, body.Last());
+            body.RemoveAt(body.Count-1);
+        }
+    }
+
+    void TailFollowing (List<Transform> body)
+    {
+        {
+            if (body.Last().eulerAngles.z == 0)
+            {
+                tailTranform.position = body.Last().position;
+                tailTranform.eulerAngles = new Vector3(0, 0, 0);
+            }
+            else if (body.Last().eulerAngles.z == 180)
+            {
+                tailTranform.position = body.Last().position;
+                tailTranform.eulerAngles = new Vector3(0, 0, 180);
+            }
+            else if (body.Last().eulerAngles.z == 90)
+            {
+                tailTranform.position = body.Last().position;
+                tailTranform.eulerAngles = new Vector3(0, 0, 90);
+            }
+            else
+            {
+                tailTranform.position = body.Last().position;
+                tailTranform.eulerAngles = new Vector3(0, 0, -90);
+            }
         }
     }
 }
