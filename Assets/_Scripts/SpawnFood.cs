@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class SpawnFood : MonoBehaviour
 {
-    // Food
+    [Header("Food")]
     [SerializeField] GameObject foodPrefab;
 
-    // Borders
+    [Header("Border")]
     [SerializeField] Transform borderTop;
     [SerializeField] Transform borderBottom;
     [SerializeField] Transform borderLeft;
@@ -15,7 +15,7 @@ public class SpawnFood : MonoBehaviour
 
     void Start()
     {
-        InvokeRepeating("Spawn",3,4);
+        InvokeRepeating("Spawn", 3,4);
     }
 
     void Spawn()
@@ -33,7 +33,8 @@ public class SpawnFood : MonoBehaviour
             y++;
         }
 
-        Instantiate(foodPrefab, new Vector2(x, y), Quaternion.identity);
+        var spawnedFood = Instantiate(foodPrefab, new Vector2(x, y), Quaternion.identity);
+        spawnedFood.transform.parent = transform;
     }
 
 }

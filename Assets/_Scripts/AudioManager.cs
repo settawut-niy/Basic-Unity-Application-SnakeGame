@@ -24,12 +24,24 @@ public class AudioManager : MonoBehaviour
     [Header("BGM Sound")]
     [SerializeField] AudioClip a_BGM;
 
+    public enum SFXType
+    {
+        Eat,
+        iPop,
+        iBeep,
+        iClick,
+        GameOver
+    }
+
     void Awake()
     {
         instance = this;
         audioSource_SFX = GetComponent<AudioSource>();
         audioSource_BGM = GameObject.Find("BGM Sound").GetComponent<AudioSource>();
+    }
 
+    void Start()
+    {
         CheckAudioState();
     }
 
@@ -68,29 +80,25 @@ public class AudioManager : MonoBehaviour
         audioSource_BGM.Play();
     }
 
-    public void PlayEatSound ()
+    public void PlaySFX(SFXType sfx)
     {
-        audioSource_SFX.PlayOneShot(a_Eat, 1f);
-    }
-
-    public void PlayInteractSound(string sound)
-    {
-        switch (sound)
+        switch (sfx)
         {
-            case "pop":
+            case SFXType.Eat:
+                audioSource_SFX.PlayOneShot(a_Eat, 1f);
+                break;
+            case SFXType.iPop:
                 audioSource_SFX.PlayOneShot(a_Pop, 0.2f);
                 break;
-            case "beep":
+            case SFXType.iBeep:
                 audioSource_SFX.PlayOneShot(a_Beep, 0.2f);
                 break;
-            case "click":
+            case SFXType.iClick:
                 audioSource_SFX.PlayOneShot(a_Click, 1f);
                 break;
+            case SFXType.GameOver:
+                audioSource_SFX.PlayOneShot(a_GameOver, 1f);
+                break;
         }
-    }
-
-    public void PlayGameOverSound()
-    {
-        audioSource_SFX.PlayOneShot(a_GameOver, 1f);
     }
 }

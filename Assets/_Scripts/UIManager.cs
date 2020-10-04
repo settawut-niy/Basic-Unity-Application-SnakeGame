@@ -15,55 +15,83 @@ public class UIManager : MonoBehaviour
     [SerializeField] Text text_GameMenuHighestScore;
     [SerializeField] Button button_Close;
     [SerializeField] Toggle toggle_Audio;
+    bool m_isGameMenuActive;
+    public bool IsGameMenuActive
+    {
+        get { return m_isGameMenuActive; }
+    }
 
     [Header("In-Game Score")]
     [SerializeField] RectTransform panel_InGameUI;
     [SerializeField] Text text_InGameCurrentScore;
     [SerializeField] Text text_InGameHighestScore;
 
-    [Header("Instructor")]
-    [SerializeField] Image panel_Instructor;
+    [Header("Instruction")]
+    [SerializeField] Image panel_Instruction;
 
-    [Header("Initail Game")]
-    [SerializeField] Image panel_InitailGame;
+    [Header("Initail Game Pop Up")]
+    [SerializeField] Image panel_InitailGamePopUp;
+
+    public enum UIType
+    {
+        GameMenu,
+        InGameUI,
+        Instruction,
+        InitailGamePopUp
+    }
 
     void Awake()
     {
         instance = this;
+    }
 
-        SetActiveInstructor(true);
+    void Start()
+    {
+        SetActiveUI(UIType.Instruction, true);
 
         CheckAudioStateToogle();
     }
 
     void Update()
     {
+        ShowOrHideGameMenu();
+
+        ShowOrHideInstruction();
+    }
+
+    void ShowOrHideGameMenu()
+    {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (!panel_GameMenu.gameObject.activeSelf && GameManager.instance.currentGameState == GameState.Playing)
             {
                 GameManager.instance.StopPlay();
-                AudioManager.instance.PlayInteractSound("click");
+                AudioManager.instance.PlaySFX(AudioManager.SFXType.iClick);
             }
             else if (panel_GameMenu.gameObject.activeSelf && GameManager.instance.currentGameState == GameState.Stop)
             {
                 GameManager.instance.InitialGame();
-                AudioManager.instance.PlayInteractSound("click");
+                AudioManager.instance.PlaySFX(AudioManager.SFXType.iClick);
             }
-        }
 
+            m_isGameMenuActive = panel_GameMenu.gameObject.activeSelf;
+        }
+    }
+
+    void ShowOrHideInstruction()
+    {
         if (Input.GetKeyDown(KeyCode.F1))
         {
-            if (!panel_Instructor.gameObject.activeSelf)
+            if (!panel_Instruction.gameObject.activeSelf)
             {
-                SetActiveInstructor(true);
+                SetActiveUI(UIType.Instruction, true);
             }
             else
             {
-                SetActiveInstructor(false);
+                SetActiveUI(UIType.Instruction, false);
             }
 
-            AudioManager.instance.PlayInteractSound("click");
+            AudioManager.instance.PlaySFX(AudioManager.SFXType.iClick);
         }
     }
 
@@ -81,7 +109,26 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void SetActiveGameMenu(bool isSet)
+    public void SetActiveUI (UIType uiType, bool isSet)
+    {
+        switch (uiType)
+        {
+            case UIType.GameMenu:
+                SetActiveGameMenu(isSet);
+                break;
+            case UIType.InGameUI:
+                panel_InGameUI.gameObject.SetActive(isSet);
+                break;
+            case UIType.Instruction:
+                panel_Instruction.gameObject.SetActive(isSet);
+                break;
+            case UIType.InitailGamePopUp:
+                panel_InitailGamePopUp.gameObject.SetActive(isSet);
+                break;
+        }
+    }
+
+    void SetActiveGameMenu(bool isSet)
     {
         panel_GameMenu.gameObject.SetActive(isSet);
 
@@ -101,23 +148,10 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void SetActiveInGameUI(bool isSet)
-    {
-        panel_InGameUI.gameObject.SetActive(isSet);
-    }
-
-    public void SetActiveInstructor(bool isSet)
-    {
-        panel_Instructor.gameObject.SetActive(isSet);
-    }
-
-    public void SetActiveInitialGame(bool isSet)
-    {
-        panel_InitailGame.gameObject.SetActive(isSet);
-    }
-
     public void SetActiveAudioToggle ()
     {
+        AudioManager.instance.PlaySFX(AudioManager.SFXType.iClick);
+
         if (toggle_Audio.isOn)
         {
             AudioManager.instance.SetActiveAllAudio(true);
@@ -138,13 +172,22 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void CloseButton()
+    {
+        AudioManager.instance.PlaySFX(AudioManager.SFXType.iClick);
+        GameManager.instance.InitialGame();
+        m_isGameMenuActive = panel_GameMenu.gameObject.activeSelf;
+    }
+
     public void PlayAgainButton ()
     {
+        AudioManager.instance.PlaySFX(AudioManager.SFXType.iClick);
         GameManager.instance.NewGame();
     }
 
     public void ExitButton ()
     {
+        AudioManager.instance.PlaySFX(AudioManager.SFXType.iClick);
         Application.Quit();
     }
 }

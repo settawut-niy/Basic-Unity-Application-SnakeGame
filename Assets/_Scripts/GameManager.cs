@@ -30,33 +30,33 @@ public class GameManager : MonoBehaviour
     {
         currentGameState = GameState.Stop;
         Time.timeScale = 0;
-        UIManager.instance.SetActiveGameMenu(false);
-        UIManager.instance.SetActiveInGameUI(true);
-        UIManager.instance.SetActiveInitialGame(true);
+        UIManager.instance.SetActiveUI(UIManager.UIType.InitailGamePopUp, true);
+        UIManager.instance.SetActiveUI(UIManager.UIType.InGameUI, true);
+        UIManager.instance.SetActiveUI(UIManager.UIType.GameMenu, false);
     }
 
     public void StartPlay()
     {
         currentGameState = GameState.Playing;
         Time.timeScale = 1;
-        UIManager.instance.SetActiveInitialGame(false);
+        UIManager.instance.SetActiveUI(UIManager.UIType.InitailGamePopUp, false);
     }
 
     public void StopPlay()
     {
         currentGameState = GameState.Stop;
         Time.timeScale = 0;
-        UIManager.instance.SetActiveGameMenu(true);
-        UIManager.instance.SetActiveInGameUI(false);
+        UIManager.instance.SetActiveUI(UIManager.UIType.GameMenu, true);
+        UIManager.instance.SetActiveUI(UIManager.UIType.InGameUI, false);
     }
 
     public void GameOver()
     {
         currentGameState = GameState.GameOver;
         Time.timeScale = 0f;
-        UIManager.instance.SetActiveGameMenu(true);
-        UIManager.instance.SetActiveInGameUI(false);
-        AudioManager.instance.PlayGameOverSound();
+        UIManager.instance.SetActiveUI(UIManager.UIType.GameMenu, true);
+        UIManager.instance.SetActiveUI(UIManager.UIType.InGameUI, false);
+        AudioManager.instance.PlaySFX(AudioManager.SFXType.GameOver);
     }
 
     public void NewGame()
